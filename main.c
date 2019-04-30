@@ -1,12 +1,17 @@
-/*  Fiquei com algumas dúvidas a respeito do programa e parei aqui para a gente decidir:
- *  1) Leitura dos comandos para executar os programas e começar a preencher as filas do escalonador será feita como? Inserido na linha de comando? Lendo arquivos externos, acho válido perguntar para o Seibel. Ou seja como iremos preencher as filas F1, F2 e F3. Ele chama de "interpretador" no enunciado
+/********************************************************************
+ *  Fiquei com algumas dúvidas a respeito do programa e parei aqui para a gente decidir:
+ *  1) Leitura dos comandos para executar os programas e começar a preencher as filas do escalonador será feita como? Inserido na linha de comando? Lendo arquivos 
+ *     externos, acho válido perguntar para o Seibel. Ou seja como iremos preencher as filas F1, F2 e F3. Ele chama de "interpretador" no enunciado
  * ex: exec prog1 (1,2,3) tem que ser lido de onde
  *  
  *  2) O método Round Robin segue essa lógica aqui:https://pt.wikipedia.org/wiki/Round-robin
- *     Parece ser bem simples, so fiquei com dúvida que de como a gente vai fazer para retomar um processo parado. O enunciado fala que usaremos sigstop e sigcont para pausar e retomar o processo, sinal ja recomeça o processo a partir do ponto que ele parou?
+ *     Parece ser bem simples, so fiquei com dúvida que de como a gente vai fazer para retomar um processo parado. O enunciado fala que usaremos sigstop e sigcont para 
+ *     pausar e retomar o processo, sinal ja recomeça o processo a partir do ponto que ele parou?
  * 
+ *  3) Precisamos saber como iremos simular o comportamento I/O Bound. O enunciado pede para que a gente suba a prioridade de um processo no momento que esse 
+ *     comportamennto for apresentado, mas não sei como podemos fazer.
  * 
- */
+ ********************************************************************/
 
 
 
