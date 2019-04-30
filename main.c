@@ -1,9 +1,10 @@
 /*  Fiquei com algumas dúvidas a respeito do programa e parei aqui para a gente decidir:
- *  1) Leitura dos comandos para executar os programas e começar a preencher as filas do escalonador será feita como? Inserido na linha de comando? Lendo arquivos externos, acho válido perguntar para o Seibel
+ *  1) Leitura dos comandos para executar os programas e começar a preencher as filas do escalonador será feita como? Inserido na linha de comando? Lendo arquivos externos, acho válido perguntar para o Seibel. Ou seja como iremos preencher as filas F1, F2 e F3. Ele chama de "interpretador" no enunciado
  * ex: exec prog1 (1,2,3) tem que ser lido de onde
  *  
  *  2) O método Round Robin segue essa lógica aqui:https://pt.wikipedia.org/wiki/Round-robin
- *     Parece ser bem simples, so fiquei com dúvida que de como a gente vai fazer para retomar um processo parado. O enunciado fala que usaremos sigstop e sigcont para pausar e retomar o processo, sinal ja recomeça o processo a partir do ponto que ele parou?  . Será 
+ *     Parece ser bem simples, so fiquei com dúvida que de como a gente vai fazer para retomar um processo parado. O enunciado fala que usaremos sigstop e sigcont para pausar e retomar o processo, sinal ja recomeça o processo a partir do ponto que ele parou?
+ * 
  * 
  */
 
@@ -28,7 +29,7 @@ struct programa {
     int pid_processo;
     int prioridade;
     char nome[10];
-    int estaRodando;
+    int esta_rodando;
     
 }; typedef struct programa Programa;
 
@@ -88,14 +89,60 @@ int main(int argc, char *argv[]) {
 }
 
 int escalonador( Programa *F1, Programa *F2, Programa *F3, int *tamFilas) {
-    int i = 0;
+    int aux = 0, i = 0, pid, status;
+    int quantum = 3;
     int processosFinalizados = 0;
+    Programa filas[3];
     int processosExistentes = tamFilas[0] + tamFilas[1] + tamFilas[2];
-    while( processosFinalizados < numeroExistentes ) {
-    // temos que aplicar a lógica round robin - https://pt.wikipedia.org/wiki/Round-robin
+    
+    filas[0] = F1;
+    filas[1] = F2;
+    filas[2] = F3;
+    
+    while( processosFinalizados < processosExistentes ) {
+        while( aux < 3 ) { // tratamento para as filas em geral
+            while( tamFilas[aux] >= i ) { // tratamento para a filas individualmente
+                if( processosFinalizados < tamFilas[aux] || i == tamFilas[aux]) { // checa se todos os processos da fila foram finalizados, se não, recomeça a fila. 
+                    i = 0;
+                    continue;
+                }
+                pid = fork();
+                pid = filas[aux][i]->pid_processo;
+                if( pid < 0 ) {
+                    printf("Fork com problemas na inicialização de processos da f1\n");
+                } else if( pid == 0 ) { // filho cria o programa
+                    execl( filas[aux][i]->nome, "", NULL);
+                    filas[aux][i]->estaRodando = 0;
+                } else {                // pai para o programa imediatamente
+                    kill( pid, SIGSTOP);
+                }
+                
+                if( filas[aux][i]->estaRodando == 0 ) { // fazemos essa checagem para ver se o programa ja foi iniciado
+                    printf("Processo %s em execuçao! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
+                    kill( filas[aux][i]->pid_processo, SIGCONT); // Continua o processo
+                    sleep(quantum); //  Faz com que ele execute por quantum (s) 
+                    
+                    estadoProcesso = waitpid(filas[aux][i]->pid_processo, &status, WNOHANG);// Argumento WNOHANG faz com que a func wait pid retorne imediatamente se nenhum processo-filho terminou.
+                    
+                    if( estadoProcesso == 0 ) { // processo ainda não finalizado
+                        printf("Processo %s pausado! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
+                        filas[aux][i]->esta_rodando = 1;
+                        kill( filas[aux][i]->pid_processo, SIGSTOP);
+                    } else if( estadoProcesso == -1 ) { // processo finalizado com erro;
+                        printf("Processo %s finalizado com erro! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
+                    } else { // processo finalizado
+                        printf("Processo %s Finalizado com sucesso! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
+                        if( aux == 0 || aux == 1 ) {
+                            filas[aux+1][tamFilas[aux+1]+processosFinalizados] = filas[aux][i]; // se a fila for 1 ou 2, precisamos colocar o processo finalizado na fila de baixo
+                        }
+                        processosFinalizados++;
+                    }
+                }
+            }
+        }
     }
 }
 
 void processoFinalizado(int sig) {
-    printf("Processo %d terminado", sig);
+    printf("Finalização de processo capturada\n");
 }
