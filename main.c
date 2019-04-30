@@ -12,9 +12,6 @@
  *     comportamennto for apresentado, mas não sei como podemos fazer.
  * 
  ********************************************************************/
-
-
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -26,15 +23,17 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/shm.h>
+#define EVER ;;
 
-int LIMITE_FILA_PROGRAMAS = 10;
+
+int LIMITE_PROGRAMAS_FILA = 10;
 int NUM_FILAS = 3;
 
 struct programa {
     int pid_processo;
     int prioridade;
     char nome[10];
-    int esta_rodando;
+    short int esta_rodando;
     
 }; typedef struct programa Programa;
 
@@ -56,13 +55,13 @@ int main(int argc, char *argv[]) {
     int segmentoFilasTam;
     
     ///// Criação de Espaço de memória para filas do escalonador///////
-    segmentoFila1 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_FILA_PROGRAMAS, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+    segmentoFila1 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_PROGRAMAS_FILA, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
     F1 = (Programa*)shmat(segmentoFila1,0,0);
      
-    segmentoFila2 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_FILA_PROGRAMAS, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+    segmentoFila2 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_PROGRAMAS_FILA, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
     F2 = (Programa*)shmat(segmentoFila2,0,0);
      
-    segmentoFila3 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_FILA_PROGRAMAS, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+    segmentoFila3 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_PROGRAMAS_FILA, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
     F3 = (Programa*)shmat(segmentoFila3,0,0);
     
     
@@ -95,6 +94,8 @@ int main(int argc, char *argv[]) {
     
 }
 
+
+
 int escalonador( Programa *F1, Programa *F2, Programa *F3, int *tamFilas) {
     int aux = 0, i = 0, pid, status;
     int quantum = 3;
@@ -115,12 +116,12 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *tamFilas) {
                 }
                 if( filas[aux][i]->esta_rodando == 1 ) { // fazemos essa checagem para ver se o programa não foi iniciado
                     pid = fork();
-                    filas[aux][i]->pid_processo = pid;
                     if( pid < 0 ) {
                         printf("Fork com problemas na inicialização de processos da f%d\n",aux);
                     } else if( pid == 0 ) { // filho cria o programa
                         filas[aux][i]->esta_rodando = 0;
-                        execl( filas[aux][i]->nome, "", NULL);
+			filas[aux][i]->pid_processo = getpid();
+                        execl( filas[aux][i]->nome, NULL, NULL);
                     } else {                // pai para o programa imediatamente
                         kill( pid, SIGSTOP);
                     }
@@ -129,8 +130,14 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *tamFilas) {
                 if( filas[aux][i]->esta_rodando == 0 ) { // fazemos essa checagem para ver se o programa ja foi iniciado
                     printf("Processo %s em execuçao! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
                     kill( filas[aux][i]->pid_processo, SIGCONT); // Continua o processo
-                    sleep(quantum); //  Faz com que ele execute por quantum (s) 
-                    
+                    //sleep(quantum); //  Faz com que ele execute por quantum (s)
+          				for(EVER){
+							if(acabou == 0){
+								
+							}					
+					}          
+
+
                     estadoProcesso = waitpid(filas[aux][i]->pid_processo, &status, WNOHANG);// Argumento WNOHANG faz com que a func wait pid retorne imediatamente se nenhum processo-filho terminou.
                     
                     if( estadoProcesso == 0 ) { // processo ainda não finalizado
