@@ -46,14 +46,15 @@ int main(int argc, char *argv[]) {
     Programa *F3;
     int *tamFilas;
     
+    int status;
     int segmentoFila1, segmentoFila2, segmentoFila3;
     int segmentoFilasTam;
     
     ///// Criação de Espaço de memória para filas do escalonador///////
-    segmentoFila1 = shmget (IPC_PRIVATE, sizeof (Programa) * limiteProgramas, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+    segmentoFila1 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_FILA_PROGRAMAS, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
     F1 = (Programa*)shmat(segmentoFila1,0,0);
      
-    segmentoFila2 = shmget (IPC_PRIVATE, sizeof (Programa) * limiteProgramas, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
+    segmentoFila2 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_FILA_PROGRAMAS, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
     F2 = (Programa*)shmat(segmentoFila2,0,0);
      
     segmentoFila3 = shmget (IPC_PRIVATE, sizeof (Programa) * LIMITE_FILA_PROGRAMAS, IPC_CREAT | IPC_EXCL | S_IRUSR | S_IWUSR);
@@ -75,6 +76,7 @@ int main(int argc, char *argv[]) {
     if( pid == 0 ) {                         // Filho
         //desenvolver leitor para preencher as filas
     } else {                                 // Pai
+        waitpid(pid, &status, NULL)
         escalonador(F1, F2, F3, tamFilas);         
     }
      
@@ -106,18 +108,20 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *tamFilas) {
                     i = 0;
                     continue;
                 }
-                pid = fork();
-                pid = filas[aux][i]->pid_processo;
-                if( pid < 0 ) {
-                    printf("Fork com problemas na inicialização de processos da f1\n");
-                } else if( pid == 0 ) { // filho cria o programa
-                    execl( filas[aux][i]->nome, "", NULL);
-                    filas[aux][i]->estaRodando = 0;
-                } else {                // pai para o programa imediatamente
-                    kill( pid, SIGSTOP);
+                if( filas[aux][i]->esta_rodando == 1 ) { // fazemos essa checagem para ver se o programa não foi iniciado
+                    pid = fork();
+                    filas[aux][i]->pid_processo = pid;
+                    if( pid < 0 ) {
+                        printf("Fork com problemas na inicialização de processos da f%d\n",aux);
+                    } else if( pid == 0 ) { // filho cria o programa
+                        filas[aux][i]->esta_rodando = 0;
+                        execl( filas[aux][i]->nome, "", NULL);
+                    } else {                // pai para o programa imediatamente
+                        kill( pid, SIGSTOP);
+                    }
                 }
                 
-                if( filas[aux][i]->estaRodando == 0 ) { // fazemos essa checagem para ver se o programa ja foi iniciado
+                if( filas[aux][i]->esta_rodando == 0 ) { // fazemos essa checagem para ver se o programa ja foi iniciado
                     printf("Processo %s em execuçao! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
                     kill( filas[aux][i]->pid_processo, SIGCONT); // Continua o processo
                     sleep(quantum); //  Faz com que ele execute por quantum (s) 
@@ -126,12 +130,11 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *tamFilas) {
                     
                     if( estadoProcesso == 0 ) { // processo ainda não finalizado
                         printf("Processo %s pausado! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
-                        filas[aux][i]->esta_rodando = 1;
                         kill( filas[aux][i]->pid_processo, SIGSTOP);
                     } else if( estadoProcesso == -1 ) { // processo finalizado com erro;
                         printf("Processo %s finalizado com erro! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
                     } else { // processo finalizado
-                        printf("Processo %s Finalizado com sucesso! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
+                        printf("Processo %s finalizado com sucesso! ( Pid: %d )\n", filas[aux][i]->nome, filas[aux][i]->pid_processo);
                         if( aux == 0 || aux == 1 ) {
                             filas[aux+1][tamFilas[aux+1]+processosFinalizados] = filas[aux][i]; // se a fila for 1 ou 2, precisamos colocar o processo finalizado na fila de baixo
                         }
