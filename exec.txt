@@ -1,2 +1,2 @@
 exec programa1 (4,2,3)
-exec programa2 (8,2,3)
+exec programa2 (8,1,3)
