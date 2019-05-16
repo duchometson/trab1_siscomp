@@ -29,14 +29,15 @@
 int LIMITE_PROGRAMAS_FILA = 10;
 int NUM_FILAS = 3;
 int flagAlarmeTocando = 1; // false = 1 , true = 0;
+int processosFinalizados = 0;
 
 struct programa {
     int pid_processo;
     int prioridade;
     char nome[10];
-    short int esta_rodando;
+    short int esta_rodando; // não esta  = 1 , esta = 0;
     int tempoRajadas[3];
-    
+    int idRajada;// primeira rajada = 0 , segunda rajada = 1 , terceira rajada = 2
 }; typedef struct programa Programa;
 
 void pausaProcesso();
@@ -71,7 +72,6 @@ int main(int argc, char *argv[]) {
     F3 = (Programa*)shmat(segmentoFila3,0,0);
     
     
-    signal(SIGCHLD, processoFinalizado); // cadastra o catcher de quando um processo é finalizado
     signal(SIGALRM, alarme);
     
     
@@ -132,6 +132,7 @@ int interpretador ( FILE *arqExec, Programa *F1, Programa *F2, Programa *F3, int
         F1[i].tempoRajadas[1] = t2;
         F1[i].tempoRajadas[2] = t3;
         F1[i].esta_rodando = 1;
+        F1[i].idRajada = 0;
         (*numeroProgramasLidos)++;
         i++;
         
@@ -149,7 +150,8 @@ int interpretador ( FILE *arqExec, Programa *F1, Programa *F2, Programa *F3, int
 int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasLidos, int *statusInterpretador) {
     int aux = 0, i = 0, pid, status;
     int quantum = 3;
-    int processosFinalizados = 0;
+    int tamF1 = 0, tamF2 = 0, tamF3 = 0;
+    int tamFilas[3];
     Programa *filas[3];
     
     int estadoProcesso;
@@ -158,19 +160,30 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
     filas[1] = F2;
     filas[2] = F3;
     
+    signal(SIGCHLD, processoFinalizado); // cadastra o catcher de quando um processo filho é finalizado
+
     alarm(3);
     
     printf("Pai: Entrei no escalonador\n");
+    tamF1 = (*numeroProgramasLidos);
     while( processosFinalizados < (*numeroProgramasLidos) || (*statusInterpretador) == 0) { // enquanto ainda existirem processos para ser lidos ou existentes
         printf("Processos Existentes: %d Processos Finalizados: %d \n",(*numeroProgramasLidos), processosFinalizados);
         while( aux < 3 ) {
-            printf("Entrei while 2 com aux = %d\n", aux);
-            while( (*numeroProgramasLidos) >= i ) { // tratamento para a filas individualmente
-                printf("Entrei while 3 com i = %d\n", i);
-                if( processosFinalizados < (*numeroProgramasLidos) && i == (*numeroProgramasLidos) ) { // checa se todos os processos da fila foram finalizados, se não, recomeça a fila. 
-                    printf("Rodei todos os processos, mas ainda tenho o que fazer\n");
-                    i = 0;
-                    continue;
+            printf("Estou na fila %d \n", aux+1);
+            if( processosFinalizados < (*numeroProgramasLidos) ) { // checa se todos os processos da fila foram finalizados
+                aux = 0;
+            }
+            while( tamF1 >= i || tamF2 >= i || tamF3 >= i ) { // tratamento para a filas individualmente
+                printf("i = %d\n",i);
+                printf("tamF1 = %d\n", tamF1);
+                printf("tamF2 = %d\n", tamF2);
+                printf("tamF3 = %d\n", tamF3);
+                if( processosFinalizados < (*numeroProgramasLidos) ) { // checa se todos os processos da fila foram finalizados
+                    if( (aux == 0 && i == tamF1 ) || (aux == 1 && i == tamF2 ) || (aux == 2 && i == tamF3 ) ) { // se não foram e todas as 
+                        printf("Vou passar para a próxima fila! Fila atual: %d \n",aux + 1);
+                        i = 0;
+                        continue;
+                    }
                 }
                 if( filas[aux][i].esta_rodando == 1 ) { // fazemos essa checagem para ver se o programa não foi iniciado
                     pid = fork();
@@ -179,7 +192,7 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                     } else if( pid == 0 ) { // filho cria o programa
                         printf("Criando processo %s\n", filas[aux][i].nome);
                         char buffer[50];
-                        sprintf( buffer, "%d", filas[aux][i].tempoRajadas[0]);
+                        sprintf( buffer, "%d", filas[aux][i].tempoRajadas[filas[aux][i].idRajada]);
                         char *args[] = {  buffer, NULL  };
                         execv( filas[aux][i].nome, args);
                     } else {                // pai para o programa imediatamente
@@ -188,26 +201,56 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                         kill( filas[aux][i].pid_processo, SIGSTOP);
                     }
                 }
-                 printf("========\nProcesso %s\nEstado: %d\nT1:%d\nT2:%d\nT3:%d ( Pid: %d )\n========\n", filas[aux][i].nome, filas[aux][i].esta_rodando, filas[aux][i].tempoRajadas[0], filas[aux][i].tempoRajadas[1], filas[aux][i].tempoRajadas[2], filas[aux][i].pid_processo);
+                 //printf("========\nProcesso %s\nEstado: %d\nT1:%d\nT2:%d\nT3:%d ( Pid: %d )\n========\n", filas[aux][i].nome, filas[aux][i].esta_rodando, filas[aux][i].tempoRajadas[0], filas[aux][i].tempoRajadas[1], filas[aux][i].tempoRajadas[2], filas[aux][i].pid_processo);
                 if( filas[aux][i].esta_rodando == 0 ) { // fazemos essa checagem para ver se o programa ja foi iniciado
                     printf("Processo %s em execuçao! ( Pid: %d )\n", filas[aux][i].nome, filas[aux][i].pid_processo);
                     kill( filas[aux][i].pid_processo, SIGCONT); // Continua o processo
                     for(EVER){
                         estadoProcesso = waitpid(filas[aux][i].pid_processo, &status, WNOHANG);// Argumento WNOHANG faz com que a func wait pid retorne imediatamente se nenhum processo-filho terminou.
-						if(flagAlarmeTocando == 0){
-                           kill( filas[aux][i].pid_processo, SIGSTOP);
-                           flagAlarmeTocando = 1;
-                           break;
+                        if(flagAlarmeTocando == 0) { // alarme disparou antes do final do processo
+                            printf("estado do processo atual = %d\n", estadoProcesso);
+                            kill( filas[aux][i].pid_processo, SIGSTOP);
+                            flagAlarmeTocando = 1;
+                            // se a fila for 1 ou 2, precisamos colocar o processo finalizado na fila de baixo
+                            if( aux == 0 ) {
+                                printf("Colocando f%d de posicao %d na f%d posicao %d\n",aux+1,i,aux+2,tamF2);
+                                filas[aux+1][tamF2] = filas[aux][i];
+                                filas[aux][i].idRajada = aux + 1;
+                                tamF1--;
+                                tamF2++;
+                            }
+                            else {
+                                printf("Colocando f%d de posicao %d na f%d posicao %d\n",aux+1,i,aux+2,tamF3);
+                                filas[aux+1][tamF3] = filas[aux][i];
+                                filas[aux][i].idRajada = aux + 1;
+                                tamF2 --;
+                                tamF3 ++;
+                            }
+                            break;
 						}
-						if( estadoProcesso == 1 ) {
+						if( estadoProcesso == -1 ) { // processo terminou antes do quantum
+                            printf("estado do processo atual = %d\n", estadoProcesso);
+                            printf("Terminei antes do quantum\n");
+                            if( aux == 1 ) {
+                                printf("Colocando f%d de posicao %d na f%d posicao %d\n",aux+1,i,aux,tamF1);
+                                filas[aux-1][tamF1] = filas[aux][i];
+                                tamF1++;
+                                tamF2--;
+                                processosFinalizados++;
+                            }
+                            else {
+                                printf("Colocando f%d de posicao %d na f%d posicao %d\n",aux+1,i,aux,tamF2);
+                                filas[aux-1][tamF2] = filas[aux][i];
+                                tamF2 ++;
+                                tamF3 --;
+                                processosFinalizados++;
+                            }
                             break; //
                         }
-                    }
-                    
-                    
+                    }                   
                 }
                     
-                if( estadoProcesso == 0 ) { // processo ainda não finalizado
+                /*if( estadoProcesso == 0 ) { // processo ainda não finalizado
                     printf("Processo %s pausado! ( Pid: %d )\n", filas[aux][i].nome, filas[aux][i].pid_processo);
                     kill( filas[aux][i].pid_processo, SIGSTOP);
                 } else if( estadoProcesso == -1 ) { // processo finalizado com erro;
@@ -218,14 +261,11 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                     }
                 } else { // processo finalizado
                     printf("Processo %s finalizado com sucesso! ( Pid: %d )\n", filas[aux][i].nome, filas[aux][i].pid_processo);
-                    if( aux == 0 || aux == 1 ) {
-//                         filas[aux+1][tamFilas[aux+1]+processosFinalizados] = filas[aux][i]; // se a fila for 1 ou 2, precisamos colocar o processo finalizado na fila de baixo
-                    }
                     processosFinalizados++;
                     if( processosFinalizados == (*numeroProgramasLidos) ) {
                         return 0;
                     }
-                }
+                }*/
                 i++;
             }
             aux++;
@@ -237,7 +277,8 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
 }
 
 void processoFinalizado(int sig) {
-  //  printf("Finalização de processo capturada %d\n", sig);
+    //processosFinalizados++;
+    //printf("Finalização de processo capturada %d\n", sig);
 }
 
 void alarme() {
