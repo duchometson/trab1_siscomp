@@ -102,7 +102,8 @@ int main(int argc, char *argv[]) {
         printf("To no filho\n");
         interpretador( arqExec, F1, F2, F3, numeroProgramasLidos, statusInterpretador);
     } else {                                 // Pai
-        while( (*numeroProgramasLidos) == 0 ); // espera o interpretador ler pelo menos um programa
+        //while( (*statusInterpretador) == 1 ); // espera o interpretador ler pelo menos um programa
+        waitpid(pid, &status, WCONTINUED);
         printf("To no pai\n");
         escalonador(F1, F2, F3, numeroProgramasLidos, statusInterpretador);         
     }
@@ -146,7 +147,7 @@ int interpretador ( FILE *arqExec, Programa *F1, Programa *F2, Programa *F3, int
     printf("%d prog lidos\n", (*numeroProgramasLidos));
     (*statusInterpretador) = 1; // interpretador terminou
     printf("Filho: Acabei\n\n\n\n");
-    for(EVER); // manter o programa aqui para que o processo filho não prossiga a execução
+    //for(EVER); // manter o programa aqui para que o processo filho não prossiga a execução
     printf("To pra sempre aqui?\n");
     //exit(0);
     return 0 ;
@@ -174,7 +175,8 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
     
     printf("Pai: Entrei no escalonador\n");
     tamF1 = (*numeroProgramasLidos);
-    while( processosFinalizados < 3 * (*numeroProgramasLidos) || (*statusInterpretador) == 0) { // enquanto ainda existirem processos para ser lidos ou existentes
+
+    while( processosFinalizados < 3 * (*numeroProgramasLidos) ) { // enquanto ainda existirem processos para ser lidos ou existentes
        // printf("Processos Existentes: %d Processos Finalizados: %d \n",(*numeroProgramasLidos), processosFinalizados);
         printf("ATENÇÃO RAJADA ALTERADA\n");
         while( fila < 3 ) {
