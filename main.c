@@ -196,7 +196,6 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                 printf("tamF1 = %d\n", tempF1);
                 printf("tamF2 = %d\n", tempF2);
                 printf("tamF3 = %d\n", tempF3);
-
                 if( filas[fila][0].idRajada > 2 ) { // checa se todos os processos da fila foram finalizados
                     printf("NAO AGUENTO MAAAAAAAAIS!\n");
                     if( fila == 0 ) tempF1--;
@@ -205,6 +204,14 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                     i++;
                     break;
                 }
+//                 if( filas[fila][0].idRajada > 2 ) { // checa se todos os processos da fila foram finalizados
+//                     printf("NAO AGUENTO MAAAAAAAAIS!\n");
+//                     if( fila == 0 ) tempF1--;
+//                     else if( fila == 1 ) tempF2--;
+//                     else tempF3--;
+//                     i++;
+//                     break;
+//                 }
                 if( filas[fila][0].esta_rodando == 1 ) { // fazemos essa checagem para ver se o programa não foi iniciado
                     pid = fork();
                     if( pid < 0 ) {
@@ -245,8 +252,16 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                             
                             if( filas[fila][0].tempoRajadas[filas[fila][0].idRajada] <= 0 ) { // se processo acabar no instante do alarme
                                 processosFinalizados++;
-                                filas[fila][0].idRajada++;
                                 filas[fila][0].esta_rodando = 1;
+                                if( filas[fila][0].idRajada == 2 ) { // checa se todos os processos da fila foram finalizados
+                                    printf("NAO AGUENTO MAAAAAAAAIS!\n");
+                                    if( fila == 0 ) tempF1--;
+                                    else if( fila == 1 ) tempF2--;
+                                    else tempF3--;
+                                    i++;
+                                    break;
+                                }
+                                filas[fila][0].idRajada++;
                                 if ( fila == 0 ) { // mesma fila
                                     printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila+1,tempF1);
                                     jogaProFinaleArruma( filas[fila], 0, tempF1 );
@@ -295,35 +310,37 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                             //devoTocarAlarme = 1; // disparei o alarme para que não precise
                             sleep(3);
                             alarm(defineQuantumPorFila(fila)); //comeca um novo processo
+                            processosFinalizados++;
+                            filas[fila][0].esta_rodando = 1;
+                            if( filas[fila][0].idRajada == 2 ) { // checa se todos os processos da fila foram finalizados
+                                printf("NAO AGUENTO MAAAAAAAAIS!\n");
+                                if( fila == 0 ) tempF1--;
+                                else if( fila == 1 ) tempF2--;
+                                else tempF3--;
+                                i++;
+                                break;
+                            }
+                            filas[fila][0].idRajada++;
                             if( fila == 1 ) {
                                 printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila,tempF1);
-                                filas[fila][0].idRajada++;
-                                filas[fila][0].esta_rodando = 1;
                                 filas[fila-1][tempF1] = filas[fila][0];
                                 jogaProFinaleArruma( filas[fila], 0, tempF2 );
                                 //filas[fila][i].me_pule = 0;
                                 tempF1++;
                                 tempF2--;
-                                processosFinalizados++;
                             }
                             else if ( fila == 2 ) {
                                 printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila,tempF2);
-                                filas[fila][0].idRajada++;
-                                filas[fila][0].esta_rodando = 1;
                                 filas[fila-1][tempF2] = filas[fila][0];
                                 jogaProFinaleArruma( filas[fila], 0, tempF3 );
                                 //filas[fila][i].me_pule = 0;
                                 tempF2 ++;
                                 tempF3 --;
-                                processosFinalizados++;
                             } else {
                                  printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+1,tempF1);
-                                filas[fila][0].idRajada++;
-                                filas[fila][0].esta_rodando = 1;
                                 jogaProFinaleArruma( filas[fila], 0, tempF1 );
                                 i++;
                                 //filas[fila][i].me_pule = 0;
-                                processosFinalizados++;
                                 //filas[fila][0].me_pule = 0;								
                             }
                             break; //
