@@ -249,15 +249,23 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                             flagAlarmeTocando = 1;
                             // se a fila for 1 ou 2, precisamos colocar o processo finalizado na fila de baixo
                             filas[fila][0].tempoRajadas[filas[fila][0].idRajada] = filas[fila][0].tempoRajadas[filas[fila][0].idRajada] - defineQuantumPorFila(fila);
-                            
                             if( filas[fila][0].tempoRajadas[filas[fila][0].idRajada] <= 0 ) { // se processo acabar no instante do alarme
                                 processosFinalizados++;
                                 filas[fila][0].esta_rodando = 1;
                                 if( filas[fila][0].idRajada == 2 ) { // checa se todos os processos da fila foram finalizados
                                     printf("NAO AGUENTO MAAAAAAAAIS!\n");
-                                    if( fila == 0 ) tempF1--;
-                                    else if( fila == 1 ) tempF2--;
-                                    else tempF3--;
+                                    if( fila == 0 ) {
+                                        jogaProFinaleArruma( filas[fila], 0, tempF1 );
+                                        tempF1--;
+                                    }
+                                    else if( fila == 1 ) {
+                                        jogaProFinaleArruma( filas[fila], 0, tempF2 );
+                                        tempF2--;
+                                    }
+                                    else { 
+                                        jogaProFinaleArruma( filas[fila], 0, tempF3 );
+                                        tempF3--;
+                                    }
                                     i++;
                                     break;
                                 }
@@ -306,17 +314,28 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
 						}
 						if( estadoProcesso > 0 ) { // processo terminou antes do quantum
                             printf("estado do processo atual = %d\n", estadoProcesso);
-                            printf("Terminei antes do quantum\n");
+                            printf("Terminei antes do quantum - Vou dormir\n");
                             //devoTocarAlarme = 1; // disparei o alarme para que não precise
+                            alarm(3);
                             sleep(3);
+                            printf("Acordei\n");
                             alarm(defineQuantumPorFila(fila)); //comeca um novo processo
                             processosFinalizados++;
                             filas[fila][0].esta_rodando = 1;
                             if( filas[fila][0].idRajada == 2 ) { // checa se todos os processos da fila foram finalizados
                                 printf("NAO AGUENTO MAAAAAAAAIS!\n");
-                                if( fila == 0 ) tempF1--;
-                                else if( fila == 1 ) tempF2--;
-                                else tempF3--;
+                                if( fila == 0 ) {
+                                    jogaProFinaleArruma( filas[fila], 0, tempF1 );
+                                    tempF1--;
+                                }
+                                else if( fila == 1 ) {
+                                    jogaProFinaleArruma( filas[fila], 0, tempF2 );
+                                    tempF2--;
+                                }
+                                else { 
+                                    jogaProFinaleArruma( filas[fila], 0, tempF3 );
+                                    tempF3--;
+                                }
                                 i++;
                                 break;
                             }
