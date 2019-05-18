@@ -188,10 +188,10 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                 continue;
             }
             
+            tempF1 = tamF1;
+            tempF2 = tamF2;
+            tempF3 = tamF3;
             while( (fila == 0 && tamF1 > i)  || (fila == 1 && tamF2 > i) || (fila == 2 && tamF3 > i) ) { // tratamento para a filas individualmente
-                tempF1 = tamF1;
-                tempF2 = tamF2;
-                tempF3 = tamF3;
                 printf("i = %d\n",i);
                 printf("tamF1 = %d\n", tempF1);
                 printf("tamF2 = %d\n", tempF2);
@@ -248,41 +248,41 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                                 filas[fila][0].idRajada++;
                                 filas[fila][0].esta_rodando = 1;
                                 if ( fila == 0 ) { // mesma fila
-                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila+1,tamF1);
-                                    jogaProFinaleArruma( filas[fila], 0, tamF1 );
+                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila+1,tempF1);
+                                    jogaProFinaleArruma( filas[fila], 0, tempF1 );
                                     //filas[fila][i].me_pule = 0;
                                 } else if( fila == 1 ) {
-                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila,tamF2);
-                                    filas[fila-1][tamF1] = filas[fila][0];
-                                    jogaProFinaleArruma( filas[fila], 0, tamF2 );
-                                    tamF2--;
-                                    tamF1++;
+                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila,tempF2);
+                                    filas[fila-1][tempF1] = filas[fila][0];
+                                    jogaProFinaleArruma( filas[fila], 0, tempF2 );
+                                    tempF2--;
+                                    tempF1++;
                                 } else {
-                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila,tamF3);
-                                    filas[fila-1][tamF2] = filas[fila][0];
-                                    jogaProFinaleArruma( filas[fila], 0, tamF3 );
+                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila,tempF3);
+                                    filas[fila-1][tempF2] = filas[fila][0];
+                                    jogaProFinaleArruma( filas[fila], 0, tempF3 );
                                     tempF3--;
                                     tempF2++;
                                 }
                                 //filas[fila][i].me_pule = 0;
                             } else {
                                 if( fila == 0 ) {
-                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+2,tamF2);
-                                    filas[fila+1][tamF2] = filas[fila][0];
-                                    jogaProFinaleArruma( filas[fila], 0, tamF1 );
+                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+2,tempF2);
+                                    filas[fila+1][tempF2] = filas[fila][0];
+                                    jogaProFinaleArruma( filas[fila], 0, tempF1 );
                                     //filas[fila][i].me_pule = 0;                                
                                     tempF1--;
                                     tempF2++;
                                 } else if( fila == 1 ) {
-                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+2,tamF3);
-                                    filas[fila+1][tamF3] = filas[fila][0];
-                                    jogaProFinaleArruma( filas[fila], 0, tamF2 );
+                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+2,tempF3);
+                                    filas[fila+1][tempF3] = filas[fila][0];
+                                    jogaProFinaleArruma( filas[fila], 0, tempF2 );
                                     //filas[fila][i].me_pule = 0;                                
                                     tempF2 --;
                                     tempF3 ++;
                                 } else { // se algum processo da fila f3 não terminar e for ao final da fila.
-                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+1,tamF3);
-                                    jogaProFinaleArruma( filas[fila], 0, tamF3 );
+                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+1,tempF3);
+                                    jogaProFinaleArruma( filas[fila], 0, tempF3 );
                                     i++;
                                     //filas[fila][i].me_pule = 0;
                                 }
@@ -296,31 +296,31 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                             sleep(3);
                             alarm(defineQuantumPorFila(fila)); //comeca um novo processo
                             if( fila == 1 ) {
-                                printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila,tamF1);
+                                printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila,tempF1);
                                 filas[fila][0].idRajada++;
                                 filas[fila][0].esta_rodando = 1;
-                                filas[fila-1][tamF1] = filas[fila][0];
-                                jogaProFinaleArruma( filas[fila], 0, tamF2 );
+                                filas[fila-1][tempF1] = filas[fila][0];
+                                jogaProFinaleArruma( filas[fila], 0, tempF2 );
                                 //filas[fila][i].me_pule = 0;
                                 tempF1++;
                                 tempF2--;
                                 processosFinalizados++;
                             }
                             else if ( fila == 2 ) {
-                                printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila,tamF2);
+                                printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila,tempF2);
                                 filas[fila][0].idRajada++;
                                 filas[fila][0].esta_rodando = 1;
-                                filas[fila-1][tamF2] = filas[fila][0];
-                                jogaProFinaleArruma( filas[fila], 0, tamF3 );
+                                filas[fila-1][tempF2] = filas[fila][0];
+                                jogaProFinaleArruma( filas[fila], 0, tempF3 );
                                 //filas[fila][i].me_pule = 0;
                                 tempF2 ++;
                                 tempF3 --;
                                 processosFinalizados++;
                             } else {
-                                 printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+1,tamF1);
+                                 printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+1,tempF1);
                                 filas[fila][0].idRajada++;
                                 filas[fila][0].esta_rodando = 1;
-                                jogaProFinaleArruma( filas[fila], 0, tamF1 );
+                                jogaProFinaleArruma( filas[fila], 0, tempF1 );
                                 i++;
                                 //filas[fila][i].me_pule = 0;
                                 processosFinalizados++;
@@ -356,8 +356,11 @@ void jogaProFinaleArruma( Programa *fila, int corrente, int tamFila ) {
             fila[i] = fila[i+1];
             i++;
         }
-        fila[tamFila] = aux;
+        fila[tamFila-1] = aux;
     }
+//     for(int j = 0; j < tamFila; j++) {
+//         printf("nome:%s\ntempo restante:%d\nidRajada: %d\n",fila[j].nome, fila[j].tempoRajadas[i], fila[j].idRajada);
+//     }
 }
 
 void imprimeFila( Programa **filas) {
