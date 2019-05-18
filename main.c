@@ -122,10 +122,10 @@ int main(int argc, char *argv[]) {
 
 int interpretador ( FILE *arqExec, Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasLidos, int *statusInterpretador )
 {
-    // Arquivo terá linhas com o seguinte formato:
+    // Arquivo tera linhas com o seguinte formato:
     // exec programa1 (2,10,4)
     char exec[5];    // comando exec
-    char nomePrograma[10]; // nome do programa - 10 caracteres de limite, é necessári mais? 
+    char nomePrograma[10]; // nome do programa - 10 caracteres de limite, eh necessario mais? 
     int t1, t2, t3;  // t1 tempo da primeira rajada, t2 da segunda e t3 da terceira.     
 
     (*statusInterpretador) = 0; // interpretador esta rodando 
@@ -157,7 +157,7 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
     int i = 0, pid, status;
     int quantum = 3;
     int tamF1 = 0, tamF2 = 0, tamF3 = 0;
-    int tempF1, tempF2, tempF3;
+    int tempF1 = 0, tempF2 = 0, tempF3 = 0;
     int ultimaPosF1 = 0, ultimaPosF2 = 0, ultimaPosF3 = 0;  
     int tamFilas[3];
     Programa *filas[3];
@@ -188,16 +188,20 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                 continue;
             }
             
-            while( (fila == 0 && tamF1 >= i)  || (fila == 1 && tamF2 >= i) || (fila == 2 && tamF3 >= i) ) { // tratamento para a filas individualmente
+            while( (fila == 0 && tamF1 > i)  || (fila == 1 && tamF2 > i) || (fila == 2 && tamF3 > i) ) { // tratamento para a filas individualmente
+                tempF1 = tamF1;
+                tempF2 = tamF2;
+                tempF3 = tamF3;
                 printf("i = %d\n",i);
-                printf("tamF1 = %d\n", tamF1);
-                printf("tamF2 = %d\n", tamF2);
-                printf("tamF3 = %d\n", tamF3);
+                printf("tamF1 = %d\n", tempF1);
+                printf("tamF2 = %d\n", tempF2);
+                printf("tamF3 = %d\n", tempF3);
+
                 if( filas[fila][0].idRajada > 2 ) { // checa se todos os processos da fila foram finalizados
                     printf("NAO AGUENTO MAAAAAAAAIS!\n");
-                    if( fila == 0 ) tamF1--;
-                    else if( fila == 1 ) tamF2--;
-                    else tamF3--;
+                    if( fila == 0 ) tempF1--;
+                    else if( fila == 1 ) tempF2--;
+                    else tempF3--;
                     i++;
                     break;
                 }
@@ -244,21 +248,21 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                                 filas[fila][0].idRajada++;
                                 filas[fila][0].esta_rodando = 1;
                                 if ( fila == 0 ) { // mesma fila
-                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+1,tamF1);
+                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila+1,tamF1);
                                     jogaProFinaleArruma( filas[fila], 0, tamF1 );
                                     //filas[fila][i].me_pule = 0;
                                 } else if( fila == 1 ) {
-                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila,tamF1);
+                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila,tamF2);
                                     filas[fila-1][tamF1] = filas[fila][0];
                                     jogaProFinaleArruma( filas[fila], 0, tamF2 );
                                     tamF2--;
                                     tamF1++;
                                 } else {
-                                    printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila,tamF2);
+                                    printf("Colocando f%d de posicao 0 na f%d posicao %d\n",fila+1,fila,tamF3);
                                     filas[fila-1][tamF2] = filas[fila][0];
                                     jogaProFinaleArruma( filas[fila], 0, tamF3 );
-                                    tamF3--;
-                                    tamF2++;
+                                    tempF3--;
+                                    tempF2++;
                                 }
                                 //filas[fila][i].me_pule = 0;
                             } else {
@@ -267,15 +271,15 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                                     filas[fila+1][tamF2] = filas[fila][0];
                                     jogaProFinaleArruma( filas[fila], 0, tamF1 );
                                     //filas[fila][i].me_pule = 0;                                
-                                    tamF1--;
-                                    tamF2++;
+                                    tempF1--;
+                                    tempF2++;
                                 } else if( fila == 1 ) {
                                     printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+2,tamF3);
                                     filas[fila+1][tamF3] = filas[fila][0];
                                     jogaProFinaleArruma( filas[fila], 0, tamF2 );
                                     //filas[fila][i].me_pule = 0;                                
-                                    tamF2 --;
-                                    tamF3 ++;
+                                    tempF2 --;
+                                    tempF3 ++;
                                 } else { // se algum processo da fila f3 não terminar e for ao final da fila.
                                     printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+1,tamF3);
                                     jogaProFinaleArruma( filas[fila], 0, tamF3 );
@@ -298,8 +302,8 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                                 filas[fila-1][tamF1] = filas[fila][0];
                                 jogaProFinaleArruma( filas[fila], 0, tamF2 );
                                 //filas[fila][i].me_pule = 0;
-                                tamF1++;
-                                tamF2--;
+                                tempF1++;
+                                tempF2--;
                                 processosFinalizados++;
                             }
                             else if ( fila == 2 ) {
@@ -309,8 +313,8 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                                 filas[fila-1][tamF2] = filas[fila][0];
                                 jogaProFinaleArruma( filas[fila], 0, tamF3 );
                                 //filas[fila][i].me_pule = 0;
-                                tamF2 ++;
-                                tamF3 --;
+                                tempF2 ++;
+                                tempF3 --;
                                 processosFinalizados++;
                             } else {
                                  printf("Colocando f%d de posicao %d na f%d posicao %d\n",fila+1,i,fila+1,tamF1);
@@ -331,6 +335,9 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
             }
             i = 0;
             fila++;
+            tamF1 = tempF1;
+            tamF2 = tempF2;
+            tamF3 = tempF3;
         }
         printf("Vamos dar a volta!!!\n");
         fila = 0;

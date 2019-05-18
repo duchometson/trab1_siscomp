@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
     int tempo = atoi(argv[0]);
     for( ;tempo > 0; tempo--) {
-        printf("To no programa2 %d pid( %d )\n", tempo,getpid());
+        printf("To no programa10 %d pid( %d )\n", tempo,getpid());
         sleep(1);
     }
     return 0;
