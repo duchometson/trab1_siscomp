@@ -316,7 +316,7 @@ int escalonador( Programa *F1, Programa *F2, Programa *F3, int *numeroProgramasL
                             printf("estado do processo atual = %d\n", estadoProcesso);
                             printf("Terminei antes do quantum - Vou dormir\n");
                             //devoTocarAlarme = 1; // disparei o alarme para que não precise
-                            alarm(3);
+                            alarm(10); // 10s para não ser acionado no intervalo
                             sleep(3);
                             printf("Acordei\n");
                             alarm(defineQuantumPorFila(fila)); //comeca um novo processo
