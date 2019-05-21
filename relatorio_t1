@@ -1,0 +1,15 @@
+Felipe Metson 1520302
+Eduardo Motta 1720334
+
+
+1. O programa limita o número de 3 rajadas para cada programa.
+
+2. O quantum da UCP é de 0, não foi colocado tempo de alteração de processos em uma mesma fila.
+
+3. O quantum das filas é de 1 u.t, 2 u.t e 4 u.t para as filas 1, 2 e 3 respectivamente.
+
+4. O quantum do I/O é de 3 u.t
+
+5. Os processos tem três contextos de mudança de fila e duas movimentações possíveis. A primeira movimentação é de descer uma fila de prioridade. Essa ocorre quando o processo em uma fila n não finaliza sua execução durante o quantum de tempo oferecido por ela. A segunda movimentação é de subir na fila de prioridade. Essa ocorre em dois contextos, um deles quando o processo consegue finalizar antes do quantum de tempo oferecido pela fila ou quando o processo finaliza exatamente no quantum, ou seja, se quantum da rajada(CPU) = quantum da fila o processo sobe de prioridade. O processo não permanece na mesma fileira em casos que é finalizado simultaneamente ao quantum da fila.
+
+6. Sim. A cada início de execução de uma fila, o programa explicita a fila e os processos atualmente sendo operados. Também são exibidos os tempos de execução de cada rajada e o tempo restante da mesma dinamicamente.
