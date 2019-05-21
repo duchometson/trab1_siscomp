@@ -1,5 +1,3 @@
-exec programa1 (1,1,1)
-exec programa2 (3,2,2)
 exec programa3 (7,4,4)
-exec programa4 (7,3,1)
+
 

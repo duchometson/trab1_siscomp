@@ -1,0 +1,87 @@
+3) exec prog(7,4,4) Nesse programa é esperado que o programa altere entre filas 
+
+Primeira Rajada: Fila1 (falta 6s) -> Fila2 (falta 4s) -> Fila3 (falta 0s) 
+
+Segunda Rajada: Fila2(falta 2s) -> Fila3 (falta 0s)
+
+Terceira Rajada: Fila2(falta 2s) -> Fila3 (falta 0s)
+
+
+print da main:
+
+ LINHAS LIDA: exec programa3 (7,4,4)
+1 prog lidos
+///////////Estou na fila 1//////////////// 
+programa3 em execuçao! Rajada de número: 1 Vou durar: 7 ( Pid: 4299 )
+Criando processo programa3
+To no programa3 7 pid( 4299 )
+Toquei o alarme
+Colocando f1 de posicao 0 na f2 posicao 0
+ $$$Processos Finalizados: 0 
+///////////Estou na fila 2//////////////// 
+programa3 em execuçao! Rajada de número: 1 Vou durar: 6 ( Pid: 4299 )
+To no programa3 6 pid( 4299 )
+To no programa3 5 pid( 4299 )
+Toquei o alarme
+Colocando f2 de posicao 0 na f3 posicao 0
+ $$$Processos Finalizados: 0 
+///////////Estou na fila 3//////////////// 
+programa3 em execuçao! Rajada de número: 1 Vou durar: 4 ( Pid: 4299 )
+To no programa3 4 pid( 4299 )
+To no programa3 3 pid( 4299 )
+To no programa3 2 pid( 4299 )
+To no programa3 1 pid( 4299 )
+Toquei o alarme
+Colocando f3 de posicao 0 na f2 posicao 1
+ $$$Processos Finalizados: 1 
+///////////Estou na fila 1//////////////// 
+Fila 1 vazia!
+///////////Estou na fila 2//////////////// 
+programa3 em execuçao! Rajada de número: 2 Vou durar: 4 ( Pid: 4301 )
+Criando processo programa3
+To no programa3 4 pid( 4301 )
+To no programa3 3 pid( 4301 )
+Toquei o alarme
+Colocando f2 de posicao 0 na f3 posicao 0
+ $$$Processos Finalizados: 1 
+///////////Estou na fila 3//////////////// 
+programa3 em execuçao! Rajada de número: 2 Vou durar: 2 ( Pid: 4301 )
+To no programa3 2 pid( 4301 )
+To no programa3 1 pid( 4301 )
+Terminei antes do quantum - Vou dormir
+Bloqueado por I/O- dormindo...
+Bloqueado por I/O- dormindo...
+Bloqueado por I/O- dormindo...
+Colocando f3 de posicao 0 na f2 posicao 0
+ $$$Processos Finalizados: 2 
+///////////Estou na fila 1//////////////// 
+Fila 1 vazia!
+///////////Estou na fila 2//////////////// 
+programa3 em execuçao! Rajada de número: 3 Vou durar: 4 ( Pid: 4306 )
+Criando processo programa3
+To no programa3 4 pid( 4306 )
+To no programa3 3 pid( 4306 )
+Toquei o alarme
+Colocando f2 de posicao 0 na f3 posicao 0
+ $$$Processos Finalizados: 2 
+///////////Estou na fila 3//////////////// 
+programa3 em execuçao! Rajada de número: 3 Vou durar: 2 ( Pid: 4306 )
+To no programa3 2 pid( 4306 )
+To no programa3 1 pid( 4306 )
+Terminei antes do quantum - Vou dormir
+Bloqueado por I/O- dormindo...
+Bloqueado por I/O- dormindo...
+Bloqueado por I/O- dormindo...
+ $$$Processos Finalizados: 3 
+Programas Existentes: 1 Processos Finalizados: 3 
+Fim.
+
+
+
+4) exec prog(7,3,1) Nesse programa é esperado que o programa altere entre filas 
+
+Primeira Rajada:1 (faltam 6 seg) -> 2 (faltam 4 seg) -> 3 (terminou antes do quantum ) 
+
+->  2(faltam 1 seg) -> 3 (terminou antes do quantum)
+
+-> 2(terminou antes do quantum)
